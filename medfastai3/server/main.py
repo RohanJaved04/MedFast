@@ -2,13 +2,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from socketio import AsyncServer
 from socketio.asgi import ASGIApp
-from server.database import init_db
-from server.auth import router as auth_router
-from server.routes.user_routes import router as user_router
+from database import init_db
+from auth import router as auth_router
+from routes.user_routes import router as user_router
+from dotenv import load_dotenv
+import os
 
+# Load environment variables
+load_dotenv()
 
 # Initialize FastAPI app
-app = FastAPI()
+app = FastAPI(
+    title="MedFast AI API",
+    description="Backend API for MedFast AI medical analysis platform",
+    version="1.0.0"
+)
 
 # Allow frontend to connect (Adjust the origin based on your frontend URL)
 app.add_middleware(
@@ -29,15 +37,15 @@ def on_startup():
     init_db()
 
 # Include authentication routes
-app.include_router(auth_router, prefix="/auth")
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
 # Include user-related routes
-app.include_router(user_router, prefix="/users")
+app.include_router(user_router, prefix="/users", tags=["Users"])
 
 @app.get("/")
 def read_root():
     """Root route"""
-    return {"message": "Welcome to the FastAPI backend!"}
+    return {"message": "Welcome to the MedFast AI API!", "version": "1.0.0"}
 
 @app.get("/health")
 def health_check():
